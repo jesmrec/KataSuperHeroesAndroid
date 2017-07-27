@@ -9,7 +9,7 @@ import android.view.View;
 import org.hamcrest.Matcher;
 
 import java.util.List;
-
+import static org.hamcrest.core.AllOf.allOf;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
 
