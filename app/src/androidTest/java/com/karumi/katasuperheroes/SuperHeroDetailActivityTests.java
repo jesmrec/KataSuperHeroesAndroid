@@ -50,106 +50,46 @@ import static org.mockito.Mockito.when;
 
 @RunWith(AndroidJUnit4.class) @LargeTest public class SuperHeroDetailActivityTests {
 
-  @Rule public DaggerMockRule<MainComponent> daggerRule =
-      new DaggerMockRule<>(MainComponent.class, new MainModule()).set(
-          new DaggerMockRule.ComponentSetter<MainComponent>() {
-            @Override public void setComponent(MainComponent component) {
-              SuperHeroesApplication app =
-                  (SuperHeroesApplication) InstrumentationRegistry.getInstrumentation()
-                      .getTargetContext()
-                      .getApplicationContext();
-              app.setComponent(component);
-            }
-          });
+    @Rule
+    public DaggerMockRule<MainComponent> daggerRule =
+            new DaggerMockRule<>(MainComponent.class, new MainModule()).set(
+                    new DaggerMockRule.ComponentSetter<MainComponent>() {
+                        @Override
+                        public void setComponent(MainComponent component) {
+                            SuperHeroesApplication app =
+                                    (SuperHeroesApplication) InstrumentationRegistry.getInstrumentation()
+                                            .getTargetContext()
+                                            .getApplicationContext();
+                            app.setComponent(component);
+                        }
+                    });
 
-  @Rule public ActivityTestRule<SuperHeroDetailActivity> activityRule =
-      new ActivityTestRule<>(SuperHeroDetailActivity.class, true, false);
+    @Rule
+    public ActivityTestRule<SuperHeroDetailActivity> activityRule =
+            new ActivityTestRule<>(SuperHeroDetailActivity.class, true, false);
 
-  @Mock SuperHeroesRepository repository;
+    @Mock
+    SuperHeroesRepository repository;
 
-  @After public void tearDown() {
-    List<IdlingResource> idlingResources = getIdlingResources();
-    for (IdlingResource resource : idlingResources) {
-      unregisterIdlingResources(resource);
+
+    @Test
+    public SuperHero showNameOnToolbar() {
+        SuperHero superHero = givenBasicSuperHero();
+        startActivity(superHero);
+        onToolbarWithTitle(superHero.getName()).check(matches(isDisplayed()));
+
     }
-  }
 
-  @Test public void showsSuperHeroNameAsToolbarTitle() {
-    SuperHero superHero = givenThereIsASuperHero();
+    public SuperHero givenBasicSuperHero() {
+        return new SuperHero("a", "a", true, "a");
+    }
 
-    startActivity(superHero);
 
-    onToolbarWithTitle(superHero.getName()).check(matches(isDisplayed()));
-  }
-
-  @Test public void hidesProgressBarOnSuperHeroLoaded() {
-    SuperHero superHero = givenThereIsASuperHero();
-
-    startActivity(superHero);
-
-    onView(withId(R.id.progress_bar)).check(matches(not(isDisplayed())));
-  }
-
-  @Test public void showsSuperHeroName() {
-    SuperHero superHero = givenThereIsASuperHero();
-
-    startActivity(superHero);
-    scrollToView(R.id.tv_super_hero_name);
-
-    onView(allOf(withId(R.id.tv_super_hero_name), withText(superHero.getName()))).check(
-        matches(isDisplayed()));
-  }
-
-  @Test public void showsSuperHeroDescription() {
-    SuperHero superHero = givenThereIsASuperHero();
-
-    startActivity(superHero);
-    scrollToView(R.id.tv_super_hero_description);
-
-    onView(withText(superHero.getDescription())).check(matches(isDisplayed()));
-  }
-
-  @Test public void doesNotShowAvengersBadgeIfSuperHeroIsNotPartOfTheAvengersTeam() {
-    SuperHero superHero = givenThereIsASuperHero(false);
-
-    startActivity(superHero);
-
-    onView(withId(R.id.iv_avengers_badge)).check(matches(not(isDisplayed())));
-  }
-
-  @Test public void showsAvengersBadgeIfSuperHeroIsPartOfTheAvengersTeam() {
-    SuperHero superHero = givenAnAvenger();
-
-    startActivity(superHero);
-
-    onView(withId(R.id.iv_avengers_badge)).check(matches(isDisplayed()));
-  }
-
-  private SuperHero givenThereIsASuperHero() {
-    return givenThereIsASuperHero(false);
-  }
-
-  private SuperHero givenAnAvenger() {
-    return givenThereIsASuperHero(true);
-  }
-
-  private SuperHero givenThereIsASuperHero(boolean isAvenger) {
-    String superHeroName = "SuperHero";
-    String superHeroPhoto = "https://i.annihil.us/u/prod/marvel/i/mg/c/60/55b6a28ef24fa.jpg";
-    String superHeroDescription = "Super Hero Description";
-    SuperHero superHero =
-        new SuperHero(superHeroName, superHeroPhoto, isAvenger, superHeroDescription);
-    when(repository.getByName(superHeroName)).thenReturn(superHero);
-    return superHero;
-  }
-
-  private SuperHeroDetailActivity startActivity(SuperHero superHero) {
-    Intent intent = new Intent();
-    intent.putExtra("super_hero_name_key", superHero.getName());
-    return activityRule.launchActivity(intent);
-  }
-
-  private void scrollToView(int viewId) {
-    onView(withId(viewId)).perform(scrollTo());
-  }
+    @After
+    public void tearDown() {
+        List<IdlingResource> idlingResources = getIdlingResources();
+        for (IdlingResource resource : idlingResources) {
+            unregisterIdlingResources(resource);
+        }
+    }
 }
