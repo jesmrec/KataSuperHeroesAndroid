@@ -16,6 +16,7 @@
 
 package com.karumi.katasuperheroes;
 
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -26,17 +27,29 @@ import com.karumi.katasuperheroes.model.SuperHero;
 import com.karumi.katasuperheroes.model.SuperHeroesRepository;
 import com.karumi.katasuperheroes.ui.view.MainActivity;
 import it.cosenonjaviste.daggermock.DaggerMockRule;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.not;
+
+
 
 @RunWith(AndroidJUnit4.class) @LargeTest public class MainActivityTest {
 
@@ -57,7 +70,8 @@ import static org.mockito.Mockito.when;
 
   @Mock SuperHeroesRepository repository;
 
-  @Test public void showsEmptyCaseIfThereAreNoSuperHeroes() {
+  @Test
+  public void showsEmptyCaseIfThereAreNoSuperHeroes() {
     givenThereAreNoSuperHeroes();
 
     startActivity();
@@ -65,9 +79,41 @@ import static org.mockito.Mockito.when;
     onView(withText("¯\\_(ツ)_/¯")).check(matches(isDisplayed()));
   }
 
-  private void givenThereAreNoSuperHeroes() {
+  @Test
+  public void showsNoEmptyCaseIfThereAreNoSuperHeroes() {
+    givenThereAreSuperHeroes();
+    startActivity();
+    onView(withText("¯\\_(ツ)_/¯")).check(matches(not(isDisplayed())));
+  }
+
+    @Test
+    public void showsNoProgressBarIfThereAreSuperHeroes() {
+        givenThereAreSuperHeroes();
+        startActivity();
+        onView(withId(R.id.progress_bar)).check(matches(not(isDisplayed())));
+    }
+
+    @Test
+    public void showsProgressBarIfThereAreNoSuperHeroes() {
+        givenThereAreNoSuperHeroes();
+        startActivity();
+        onView(withId(R.id.progress_bar)).check(matches(isDisplayed()));
+    }
+
+
+    private void givenThereAreNoSuperHeroes() {
     when(repository.getAll()).thenReturn(Collections.<SuperHero>emptyList());
   }
+
+  private void givenThereAreSuperHeroes() {
+    ArrayList<SuperHero> emptyList = new ArrayList<SuperHero>();
+    emptyList.add(new SuperHero("a","a",true,"a"));
+    when(repository.getAll()).thenReturn(emptyList);
+
+  }
+
+
+
 
   private MainActivity startActivity() {
     return activityRule.launchActivity(null);
